@@ -4,74 +4,118 @@ document.addEventListener('DOMContentLoaded', function() {
         const day = String(date.getDate()).padStart(2, '0');
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const year = date.getFullYear();
-        return `${year}-${month}-${day}`;  // Format YYYY-MM-DD
+        return `${day}-${month}-${year}`;
+    }
+
+    function formatDateForInput(dateStr) {
+        const date = new Date(dateStr);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${year}-${month}-${day}`; // Format YYYY-MM-DD for input fields
     }
 
     fetch('/api/transactions')
         .then(response => response.json())
         .then(data => {
-            const transactionList = document.getElementById('transactionList');
-            if (transactionList) {
-                data.forEach(transaction => {
-                    const formattedDate = formatDate(transaction.date);
-                    const listItem = document.createElement('li');
-                    listItem.className = 'list-group-item d-flex justify-content-between align-items-center';
-                    listItem.innerHTML = `
-                        <div>
-                            <strong>Tytuł:</strong> ${transaction.title}<br>
-                            <strong>Opis:</strong> ${transaction.body}<br>
-                            <strong>Kwota:</strong> ${transaction.amount} zł<br>
-                            <strong>Data:</strong> ${formattedDate}
-                        </div>
-                        <div>
-                            <button class="btn btn-sm btn-warning edit-transaction" data-id="${transaction._id}" data-title="${transaction.title}" data-body="${transaction.body}" data-amount="${transaction.amount}" data-date="${transaction.date}">Edytuj</button>
-                            <button class="btn btn-sm btn-danger delete-transaction" data-id="${transaction._id}">Usuń</button>
-                        </div>
-                    `;
-                    transactionList.appendChild(listItem);
-                });
+            const groupedTransactions = {};
+            data.forEach(transaction => {
+                const date = transaction.date.substring(0, 10);
+                if (!groupedTransactions[date]) {
+                    groupedTransactions[date] = [];
+                }
+                groupedTransactions[date].push(transaction);
+            });
 
-                // Attach event listeners for edit and delete buttons
-                document.querySelectorAll('.edit-transaction').forEach(button => {
-                    button.addEventListener('click', function() {
-                        const id = this.getAttribute('data-id');
-                        const title = this.getAttribute('data-title');
-                        const body = this.getAttribute('data-body');
-                        const amount = this.getAttribute('data-amount');
-                        const date = this.getAttribute('data-date').substring(0, 10);  // Format YYYY-MM-DD
-                        
-                        document.getElementById('editTransactionId').value = id;
-                        document.getElementById('editTitle').value = title;
-                        document.getElementById('editBody').value = body;
-                        document.getElementById('editAmount').value = amount;
-                        document.getElementById('editDate').value = date;
-                        
-                        $('#editTransactionModal').modal('show');
-                    });
-                });
+            const daysList = document.getElementById('daysList');
+            const sortedDates = Object.keys(groupedTransactions).sort((a, b) => new Date(b) - new Date(a)); // Sort dates from newest to oldest
 
-                document.querySelectorAll('.delete-transaction').forEach(button => {
-                    button.addEventListener('click', function() {
-                        const id = this.getAttribute('data-id');
+            sortedDates.forEach(date => {
+                const transactions = groupedTransactions[date];
+                const formattedDate = formatDate(date);
+                const dayItem = document.createElement('li');
+                dayItem.className = 'list-group-item transactions-day';
+                dayItem.innerHTML = `
+                    <div>
+                        <strong>${formattedDate}</strong> (${transactions.length} transakcje)
+                        <ul class="transactions-list">
+                            ${transactions.map(transaction => `
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>Tytuł:</strong> ${transaction.title}<br>
+                                        <strong>Opis:</strong> ${transaction.body}<br>
+                                        <strong>Kwota:</strong> ${transaction.amount} zł<br>
+                                        <strong>Data:</strong> ${formatDate(transaction.date)}
+                                    </div>
+                                    <div>
+                                        <button class="btn btn-sm btn-warning edit-transaction" data-id="${transaction._id}" data-title="${transaction.title}" data-body="${transaction.body}" data-amount="${transaction.amount}" data-date="${transaction.date}">Edytuj</button>
+                                        <button class="btn btn-sm btn-danger delete-transaction" data-id="${transaction._id}">Usuń</button>
+                                    </div>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                `;
+                daysList.appendChild(dayItem);
+            });
 
-                        if (confirm('Czy na pewno chcesz usunąć tę transakcję?')) {
-                            fetch(`/api/transactions/${id}`, {
-                                method: 'DELETE'
-                            })
-                            .then(response => {
-                                if (!response.ok) {
-                                    throw new Error('Error deleting transaction');
-                                }
-                                return response.text();
-                            })
-                            .then(() => {
-                                this.closest('li').remove();
-                            })
-                            .catch(error => console.error('Error:', error));
-                        }
-                    });
+            // Attach click event to toggle transactions list
+            document.querySelectorAll('.transactions-day').forEach(dayItem => {
+                dayItem.addEventListener('click', function() {
+                    const transactionsList = this.querySelector('.transactions-list');
+                    transactionsList.style.display = transactionsList.style.display === 'none' ? 'block' : 'none';
                 });
-            }
+            });
+
+            // Attach event listeners for edit and delete buttons
+            document.querySelectorAll('.edit-transaction').forEach(button => {
+                button.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    const title = this.getAttribute('data-title');
+                    const body = this.getAttribute('data-body');
+                    const amount = this.getAttribute('data-amount');
+                    const date = formatDateForInput(this.getAttribute('data-date'));
+
+                    document.getElementById('editTransactionId').value = id;
+                    document.getElementById('editTitle').value = title;
+                    document.getElementById('editBody').value = body;
+                    document.getElementById('editAmount').value = amount;
+                    document.getElementById('editDate').value = date;
+
+                    $('#editTransactionModal').modal('show');
+                });
+            });
+
+            document.querySelectorAll('.delete-transaction').forEach(button => {
+                button.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+
+                    if (confirm('Czy na pewno chcesz usunąć tę transakcję?')) {
+                        fetch(`/api/transactions/${id}`, {
+                            method: 'DELETE'
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Error deleting transaction');
+                            }
+                            return response.text();
+                        })
+                        .then(() => {
+                            const listItem = this.closest('li');
+                            const dayItem = listItem.closest('.transactions-day');
+                            const transactionsList = listItem.closest('.transactions-list');
+
+                            listItem.remove();
+
+                            // Remove the day item if there are no more transactions in the list
+                            if (transactionsList.children.length === 0) {
+                                dayItem.remove();
+                            }
+                        })
+                        .catch(error => console.error('Error:', error));
+                    }
+                });
+            });
         });
 
     // Add transaction
@@ -94,66 +138,12 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(response => response.json())
             .then(data => {
-                const formattedDate = formatDate(data.date);
-                const transactionList = document.getElementById('transactionList');
-                const listItem = document.createElement('li');
-                listItem.className = 'list-group-item d-flex justify-content-between align-items-center';
-                listItem.innerHTML = `
-                    <div>
-                        <strong>Tytuł:</strong> ${data.title}<br>
-                        <strong>Opis:</strong> ${data.body}<br>
-                        <strong>Kwota:</strong> ${data.amount} zł<br>
-                        <strong>Data:</strong> ${formattedDate}
-                    </div>
-                    <div>
-                        <button class="btn btn-sm btn-warning edit-transaction" data-id="${data._id}" data-title="${data.title}" data-body="${data.body}" data-amount="${data.amount}" data-date="${data.date}">Edytuj</button>
-                        <button class="btn btn-sm btn-danger delete-transaction" data-id="${data._id}">Usuń</button>
-                    </div>
-                `;
-                transactionList.appendChild(listItem);
-
-                // Attach event listeners for new edit and delete buttons
-                listItem.querySelector('.edit-transaction').addEventListener('click', function() {
-                    const id = this.getAttribute('data-id');
-                    const title = this.getAttribute('data-title');
-                    const body = this.getAttribute('data-body');
-                    const amount = this.getAttribute('data-amount');
-                    const date = this.getAttribute('data-date').substring(0, 10);
-                    
-                    document.getElementById('editTransactionId').value = id;
-                    document.getElementById('editTitle').value = title;
-                    document.getElementById('editBody').value = body;
-                    document.getElementById('editAmount').value = amount;
-                    document.getElementById('editDate').value = date;
-                    
-                    $('#editTransactionModal').modal('show');
-                });
-
-                listItem.querySelector('.delete-transaction').addEventListener('click', function() {
-                    const id = this.getAttribute('data-id');
-
-                    if (confirm('Czy na pewno chcesz usunąć tę transakcję?')) {
-                        fetch(`/api/transactions/${id}`, {
-                            method: 'DELETE'
-                        })
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error('Error deleting transaction');
-                            }
-                            return response.text();
-                        })
-                        .then(() => {
-                            this.closest('li').remove();
-                        })
-                        .catch(error => console.error('Error:', error));
-                    }
-                });
-
-                // Clear form and close modal
-                addForm.reset();
-                $('#addTransactionModal').modal('hide');
+                location.reload(); // Reload the page to see the new transaction
             })
             .catch(error => console.error('Error:', error));
+
+            addForm.reset();
+            $('#addTransactionModal').modal('hide');
         });
     }
 
@@ -178,63 +168,12 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(response => response.json())
             .then(data => {
-                const formattedDate = formatDate(data.date);
-                const listItem = document.querySelector(`button[data-id="${id}"]`).closest('li');
-                listItem.innerHTML = `
-                    <div>
-                        <strong>Tytuł:</strong> ${data.title}<br>
-                        <strong>Opis:</strong> ${data.body}<br>
-                        <strong>Kwota:</strong> ${data.amount} zł<br>
-                        <strong>Data:</strong> ${formattedDate}
-                    </div>
-                    <div>
-                        <button class="btn btn-sm btn-warning edit-transaction" data-id="${data._id}" data-title="${data.title}" data-body="${data.body}" data-amount="${data.amount}" data-date="${data.date}">Edytuj</button>
-                        <button class="btn btn-sm btn-danger delete-transaction" data-id="${data._id}">Usuń</button>
-                    </div>
-                `;
-
-                // Attach event listeners for updated edit and delete buttons
-                listItem.querySelector('.edit-transaction').addEventListener('click', function() {
-                    const id = this.getAttribute('data-id');
-                    const title = this.getAttribute('data-title');
-                    const body = this.getAttribute('data-body');
-                    const amount = this.getAttribute('data-amount');
-                    const date = this.getAttribute('data-date').substring(0, 10);
-                    
-                    document.getElementById('editTransactionId').value = id;
-                    document.getElementById('editTitle').value = title;
-                    document.getElementById('editBody').value = body;
-                    document.getElementById('editAmount').value = amount;
-                    document.getElementById('editDate').value = date;
-                    
-                    $('#editTransactionModal').modal('show');
-                });
-
-                listItem.querySelector('.delete-transaction').addEventListener('click', function() {
-                    const id = this.getAttribute('data-id');
-
-                    if (confirm('Czy na pewno chcesz usunąć tę transakcję?')) {
-                        fetch(`/api/transactions/${id}`, {
-                            method: 'DELETE'
-                        })
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error('Error deleting transaction');
-                            }
-                            return response.text();
-                        })
-                        .then(() => {
-                            this.closest('li').remove();
-                        })
-                        .catch(error => console.error('Error:', error));
-                    }
-                });
-
-                // Clear form and close modal
-                editForm.reset();
-                $('#editTransactionModal').modal('hide');
+                location.reload(); // Reload the page to see the updated transaction
             })
             .catch(error => console.error('Error:', error));
+
+            editForm.reset();
+            $('#editTransactionModal').modal('hide');
         });
     }
 });

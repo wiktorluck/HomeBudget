@@ -5,11 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Transakcje</title>
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .transactions-day {
+            cursor: pointer;
+            margin-bottom: 1rem;
+        }
+        .transactions-list {
+            display: none;
+            list-style: none;
+            padding-left: 0;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <h1 class="mt-5">Lista Transakcji</h1>
-        <ul id="transactionList" class="list-group mt-3"></ul>
+        <ul id="daysList" class="list-group mt-3"></ul>
         <a href="index.html" class="btn btn-secondary mt-3">Wróć do budżetu</a>
         <button class="btn btn-primary mt-3" data-toggle="modal" data-target="#addTransactionModal">Dodaj Transakcję</button>
     </div>
