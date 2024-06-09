@@ -105,6 +105,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
                             listItem.remove();
 
+                            const badge = dayItem.querySelector('.badge');
+                            badge.textContent = transactionsList.children.length;
+
                             if (transactionsList.children.length === 0) {
                                 dayItem.remove();
                             }
