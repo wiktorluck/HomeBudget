@@ -8,7 +8,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     const listItem = document.createElement('li');
                     listItem.className = 'list-group-item d-flex justify-content-between align-items-center';
                     listItem.innerHTML = `
-                        ${transaction.title} - ${transaction.body} - ${transaction.amount}
+                        <div>
+                            <strong>Tytuł:</strong> ${transaction.title}<br>
+                            <strong>Opis:</strong> ${transaction.body}<br>
+                            <strong>Kwota:</strong> ${transaction.amount} zł
+                        </div>
                         <div>
                             <button class="btn btn-sm btn-warning edit-transaction" data-id="${transaction._id}" data-title="${transaction.title}" data-body="${transaction.body}" data-amount="${transaction.amount}">Edytuj</button>
                             <button class="btn btn-sm btn-danger delete-transaction" data-id="${transaction._id}">Usuń</button>
