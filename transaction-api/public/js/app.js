@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const day = String(date.getDate()).padStart(2, '0');
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const year = date.getFullYear();
-        return `${year}-${month}-${day}`; // Format YYYY-MM-DD for input fields
+        return `${year}-${month}-${day}`; 
     }
 
     fetch('/api/transactions')
@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             const daysList = document.getElementById('daysList');
-            const sortedDates = Object.keys(groupedTransactions).sort((a, b) => new Date(b) - new Date(a)); // Sort dates from newest to oldest
+            const sortedDates = Object.keys(groupedTransactions).sort((a, b) => new Date(b) - new Date(a));
 
             sortedDates.forEach(date => {
                 const transactions = groupedTransactions[date];
@@ -59,7 +59,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 daysList.appendChild(dayItem);
             });
 
-            // Attach click event to toggle transactions list
             document.querySelectorAll('.transactions-day').forEach(dayItem => {
                 dayItem.addEventListener('click', function() {
                     const transactionsList = this.querySelector('.transactions-list');
@@ -67,7 +66,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             });
 
-            // Attach event listeners for edit and delete buttons
             document.querySelectorAll('.edit-transaction').forEach(button => {
                 button.addEventListener('click', function() {
                     const id = this.getAttribute('data-id');
@@ -107,7 +105,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
                             listItem.remove();
 
-                            // Remove the day item if there are no more transactions in the list
                             if (transactionsList.children.length === 0) {
                                 dayItem.remove();
                             }
@@ -138,7 +135,7 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(response => response.json())
             .then(data => {
-                location.reload(); // Reload the page to see the new transaction
+                location.reload(); 
             })
             .catch(error => console.error('Error:', error));
 
@@ -168,7 +165,7 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(response => response.json())
             .then(data => {
-                location.reload(); // Reload the page to see the updated transaction
+                location.reload(); 
             })
             .catch(error => console.error('Error:', error));
 
