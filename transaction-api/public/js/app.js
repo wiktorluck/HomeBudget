@@ -36,25 +36,25 @@ document.addEventListener('DOMContentLoaded', function() {
                 const dayItem = document.createElement('li');
                 dayItem.className = 'list-group-item transactions-day';
                 dayItem.innerHTML = `
-                    <div>
-                        <strong>${formattedDate}</strong> (${transactions.length} transakcje)
-                        <ul class="transactions-list">
-                            ${transactions.map(transaction => `
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <strong>Tytuł:</strong> ${transaction.title}<br>
-                                        <strong>Opis:</strong> ${transaction.body}<br>
-                                        <strong>Kwota:</strong> ${transaction.amount} zł<br>
-                                        <strong>Data:</strong> ${formatDate(transaction.date)}
-                                    </div>
-                                    <div>
-                                        <button class="btn btn-sm btn-warning edit-transaction" data-id="${transaction._id}" data-title="${transaction.title}" data-body="${transaction.body}" data-amount="${transaction.amount}" data-date="${transaction.date}">Edytuj</button>
-                                        <button class="btn btn-sm btn-danger delete-transaction" data-id="${transaction._id}">Usuń</button>
-                                    </div>
-                                </li>
-                            `).join('')}
-                        </ul>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <strong>${formattedDate}</strong><span class="badge text-bg-primary rounded-pill">${transactions.length}</span>
                     </div>
+                    <ul class="list-group list-group-numbered transactions-list">
+                        ${transactions.map(transaction => `
+                            <li class="list-group-item d-flex justify-content-between align-items-start">
+                                <div class="ms-2 me-auto">
+                                    <strong>Tytuł:</strong> ${transaction.title}<br>
+                                    <strong>Opis:</strong> ${transaction.body}<br>
+                                    <strong>Kwota:</strong> ${transaction.amount} zł<br>
+                                    <strong>Data:</strong> ${formatDate(transaction.date)}
+                                </div>
+                                <div>
+                                    <button class="btn btn-sm btn-warning edit-transaction" data-id="${transaction._id}" data-title="${transaction.title}" data-body="${transaction.body}" data-amount="${transaction.amount}" data-date="${transaction.date}">Edytuj</button>
+                                    <button class="btn btn-sm btn-danger delete-transaction" data-id="${transaction._id}">Usuń</button>
+                                </div>
+                            </li>
+                        `).join('')}
+                    </ul>
                 `;
                 daysList.appendChild(dayItem);
             });
