@@ -2,19 +2,19 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
 const transactionRoutes = require('./routes/transactionRoutes');
-require('./db');
+const db = require('./db');
 
 const app = express();
+
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/api', transactionRoutes);
+// API routes
+app.use('/api/transactions', transactionRoutes);
 
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-app.get('/transactions', (req, res) => {
+app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'transactions.html'));
 });
 
