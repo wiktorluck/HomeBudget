@@ -1,0 +1,35 @@
+.transactions-day {
+    cursor: pointer;
+    margin-bottom: 1rem;
+}
+.transactions-list {
+    display: none;
+    list-style: none;
+    padding-left: 0;
+}
+
+@media (max-width: 576px) {
+    .container {
+        padding: 10px;
+    }
+    h1 {
+        font-size: 24px;
+    }
+    .transactions-day {
+        font-size: 16px;
+    }
+    .btn {
+        font-size: 14px;
+        padding: 5px 10px;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+}
+@media (min-width: 577px) and (max-width: 768px) {
+    h1 {
+        font-size: 28px;
+    }
+    .transactions-day {
+        font-size: 18px;
+    }
+}
