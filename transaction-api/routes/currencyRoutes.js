@@ -11,7 +11,7 @@ router.get('/convert', async (req, res) => {
     }
 
     try {
-        const apiKey = 'd29e0837e947abe6438ef78d'; // Tutaj wstaw swój klucz API
+        const apiKey = 'd29e0837e947abe6438ef78d';
         const apiUrl = `https://api.exchangerate-api.com/v4/latest/${from}`;
 
         const response = await axios.get(apiUrl);
